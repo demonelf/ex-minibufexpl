@@ -1100,6 +1100,7 @@ function! <SID>DisplayBuffers(curBufNum)
       call search('\V['.a:curBufNum.':'.s:bufUniqNameDict[a:curBufNum].']', 'w')
     endif
   endif
+  exec "normal! zz"
 
   call <SID>DEBUG('Leaving DisplayExplorer()',10)
 endfunction

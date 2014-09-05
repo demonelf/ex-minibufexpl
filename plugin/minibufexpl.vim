@@ -394,6 +394,10 @@ augroup MiniBufExpl
   autocmd BufAdd         *        call <SID>BufAddHandler()
   autocmd BufEnter       * nested call <SID>BufEnterHandler()
   autocmd BufDelete      *        call <SID>BufDeleteHandler()
+  " jwu ADD
+  " autocmd BufWritePost   *        call <SID>BufWritePostHandler()
+  " autocmd InsertEnter    *        call <SID>BufWritePostHandler()
+  " autocmd TextChanged    *        call <SID>BufWritePostHandler()
   autocmd CursorHold,CursorHoldI,BufWritePost    *
     \ call <SID>DEBUG('Entering UpdateBufferStateDict AutoCmd', 10) |
     \ call <SID>UpdateBufferStateDict(bufnr("%"),0) |
@@ -478,6 +482,16 @@ function! <SID>BufAddHandler()
 
   call <SID>DEBUG('Leaving BufAdd Handler', 10)
 endfunction
+
+" jwu ADD
+function! <SID>BufWritePostHandler()
+  call <SID>DEBUG('Entering BufWritePost Handler', 10)
+
+  call <SID>AutoUpdate(bufnr("%"),0)
+
+  call <SID>DEBUG('Leaving BufWritePost Handler', 10)
+endfunction
+" jwu ADD
 
 function! <SID>BufEnterHandler() abort
   call <SID>DEBUG('Entering BufEnter Handler', 10)
@@ -1100,6 +1114,8 @@ function! <SID>DisplayBuffers(curBufNum)
       call search('\V['.a:curBufNum.':'.s:bufUniqNameDict[a:curBufNum].']', 'w')
     endif
   endif
+
+  " jwu ADD
   exec "normal! zz"
 
   call <SID>DEBUG('Leaving DisplayExplorer()',10)

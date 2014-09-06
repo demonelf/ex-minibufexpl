@@ -371,6 +371,9 @@ let t:skipEligibleBuffersCheck = 0
 " The order of buffer listing in MBE window is tab dependently.
 let t:miniBufExplSortBy = g:miniBufExplSortBy
 
+" jwu ADD
+let t:currentActive = -1
+
 " }}}
 "
 " Auto Commands
@@ -395,10 +398,10 @@ augroup MiniBufExpl
   autocmd BufEnter       * nested call <SID>BufEnterHandler()
   autocmd BufDelete      *        call <SID>BufDeleteHandler()
   " jwu ADD
-  " autocmd BufWritePost   *        call <SID>BufWritePostHandler()
+  autocmd BufWritePost   *        call <SID>BufWritePostHandler()
   " autocmd InsertEnter    *        call <SID>BufWritePostHandler()
   " autocmd TextChanged    *        call <SID>BufWritePostHandler()
-  autocmd CursorHold,CursorHoldI,BufWritePost    *
+  autocmd CursorHold,CursorHoldI    *
     \ call <SID>DEBUG('Entering UpdateBufferStateDict AutoCmd', 10) |
     \ call <SID>UpdateBufferStateDict(bufnr("%"),0) |
     \ call <SID>DEBUG('Leaving UpdateBufferStateDict AutoCmd', 10)
@@ -473,9 +476,9 @@ endfunction
 function! <SID>BufAddHandler()
   call <SID>DEBUG('Entering BufAdd Handler', 10)
 
-  call <SID>ListAdd(s:BufList,str2nr(expand("<abuf>")))
-  call <SID>ListAdd(s:MRUList,str2nr(expand("<abuf>")))
-
+  let bufnum = str2nr(expand("<abuf>"))
+  call <SID>ListAdd(s:BufList,bufnum)
+  call <SID>ListAdd(s:MRUList,bufnum)
   call <SID>UpdateAllBufferDicts(expand("<abuf>"),0)
 
   call <SID>AutoUpdate(bufnr("%"),0)
@@ -487,7 +490,8 @@ endfunction
 function! <SID>BufWritePostHandler()
   call <SID>DEBUG('Entering BufWritePost Handler', 10)
 
-  call <SID>AutoUpdate(bufnr("%"),0)
+  call <SID>UpdateBufferStateDict(bufnr("%"),0)
+  call <SID>AutoUpdate(t:currentActive,0)
 
   call <SID>DEBUG('Leaving BufWritePost Handler', 10)
 endfunction
@@ -1113,10 +1117,20 @@ function! <SID>DisplayBuffers(curBufNum)
     else
       call search('\V['.a:curBufNum.':'.s:bufUniqNameDict[a:curBufNum].']', 'w')
     endif
+
+    " jwu ADD
+    normal! zz
   endif
 
-  " jwu ADD
-  exec "normal! zz"
+  " jwu MODIFY
+  " if t:currentActive != -1
+  "   if !g:miniBufExplShowBufNumbers
+  "     call search('\V['.s:bufUniqNameDict[t:currentActive].']', 'w')
+  "   else
+  "     call search('\V['.t:currentActive.':'.s:bufUniqNameDict[t:currentActive].']', 'w')
+  "   endif
+  "   normal! zz
+  " endif
 
   call <SID>DEBUG('Leaving DisplayExplorer()',10)
 endfunction
@@ -1198,11 +1212,12 @@ function! <SID>ResizeWindow()
         exec 'resize '.l:height
     endif
 
-    let saved_ead = &ead
-    let &ead = 'ver'
-    set equalalways
-    let &ead = saved_ead
-    set noequalalways
+    " jwu DISABLE
+    " let saved_ead = &ead
+    " let &ead = 'ver'
+    " set equalalways
+    " let &ead = saved_ead
+    " set noequalalways
 
   " Vertical Resize
   else
@@ -1224,11 +1239,12 @@ function! <SID>ResizeWindow()
       exec 'vertical resize '.l:newWidth
     endif
 
-    let saved_ead = &ead
-    let &ead = 'hor'
-    set equalalways
-    let &ead = saved_ead
-    set noequalalways
+    " jwu DISABLE
+    " let saved_ead = &ead
+    " let &ead = 'hor'
+    " set equalalways
+    " let &ead = saved_ead
+    " set noequalalways
 
   endif
 
@@ -1552,6 +1568,8 @@ function! <SID>BuildBufferList(curBufNum)
         call <SID>DEBUG('l:i is '.l:i.' and l:CurBufNum is '.l:CurBufNum,10)
         if(l:i == l:CurBufNum)
             let l:tab .= '!'
+            " jwu ADD
+            let t:currentActive = l:i
         endif
 
         let l:maxTabWidth = strlen(l:tab) > l:maxTabWidth ? strlen(l:tab) : l:maxTabWidth

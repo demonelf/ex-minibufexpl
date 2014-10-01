@@ -674,6 +674,9 @@ function! <SID>StartExplorer(curBufNum)
       setlocal colorcolumn&
   end
 
+  " jwu ADD
+  setlocal nocursorline
+
   " If you press return, o or e in the -MiniBufExplorer- then try
   " to open the selected buffer in the previous window.
   nnoremap <buffer> o       :call <SID>MBESelectBuffer(0)<CR>:<BS>
